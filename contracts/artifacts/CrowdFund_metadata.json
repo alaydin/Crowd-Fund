@@ -254,6 +254,66 @@
 			},
 			{
 				"inputs": [],
+				"name": "getCampaigns",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "uint256",
+								"name": "id",
+								"type": "uint256"
+							},
+							{
+								"internalType": "address",
+								"name": "creator",
+								"type": "address"
+							},
+							{
+								"internalType": "uint256",
+								"name": "goal",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "pledged",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint32",
+								"name": "start",
+								"type": "uint32"
+							},
+							{
+								"internalType": "uint32",
+								"name": "end",
+								"type": "uint32"
+							},
+							{
+								"internalType": "address[]",
+								"name": "donors",
+								"type": "address[]"
+							},
+							{
+								"internalType": "bool",
+								"name": "claimed",
+								"type": "bool"
+							},
+							{
+								"internalType": "bool",
+								"name": "canOperate",
+								"type": "bool"
+							}
+						],
+						"internalType": "struct CrowdFund.Campaign[]",
+						"name": "",
+						"type": "tuple[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
 				"name": "owner",
 				"outputs": [
 					{
@@ -406,6 +466,14 @@
 				"dweb:/ipfs/QmYqEbJML4jB1GHbzD4cUZDtJg5wVwNm3vDJq1GbyDus8y"
 			]
 		},
+		"@openzeppelin/contracts/token/ERC20/IERC20.sol": {
+			"keccak256": "0x9750c6b834f7b43000631af5cc30001c5f547b3ceb3635488f140f60e897ea6b",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://5a7d5b1ef5d8d5889ad2ed89d8619c09383b80b72ab226e0fe7bde1636481e34",
+				"dweb:/ipfs/QmebXWgtEfumQGBdVeM6c71McLixYXQP5Bk6kKXuoY4Bmr"
+			]
+		},
 		"@openzeppelin/contracts/utils/Context.sol": {
 			"keccak256": "0xe2e337e6dde9ef6b680e07338c493ebea1b5fd09b43424112868e9cc1706bca7",
 			"license": "MIT",
@@ -415,11 +483,11 @@
 			]
 		},
 		"contracts/CrowdFund.sol": {
-			"keccak256": "0x1aabafffab686013bed7f09bf857c235f3c97d28b1a83360d676b84cca15f4e5",
+			"keccak256": "0xe36a60d0e87b3bc347af077914935cba699c54ada712ec2c68b9f8233ed682e8",
 			"license": "GPL-3.0",
 			"urls": [
-				"bzz-raw://ac6d0459f417c46dab6e85da569443cd8b457adc3a8c74849749b30c74940797",
-				"dweb:/ipfs/QmWYTihQhQcDF7qVfGeP6KNuC6xg1XG8Xf18ZPtiFhHTHV"
+				"bzz-raw://7085100095e5495fbaae32e549ee64d0bb9213c534bf5d02842dc9f1ba06316e",
+				"dweb:/ipfs/QmZbVMNRdscwotM7FVVURan41QXLpc8itBGJcMFw2Disud"
 			]
 		}
 	},

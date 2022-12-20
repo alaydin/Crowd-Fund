@@ -2,15 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-interface IERC20 {
-    function transfer(address, uint) external returns (bool);
-
-    function transferFrom(
-        address,
-        address,
-        uint
-    ) external returns (bool);
-}
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract CrowdFund is Ownable {
     struct Campaign {
@@ -26,7 +18,7 @@ contract CrowdFund is Ownable {
     }
     IERC20 public immutable token;
     uint256 idCounter;
-    mapping(uint256 => Campaign) campaigns;
+    Campaign[] campaigns;
     // campaign id => user address => pledgedAmount
     mapping(uint256 => mapping(address => uint256)) pledgedAmount;
 
@@ -49,8 +41,8 @@ contract CrowdFund is Ownable {
         Campaign storage campaign = campaigns[_id];
         require(campaign.start <= block.timestamp, "Campaign not started yet!");
         require(campaign.end >= block.timestamp, "Campaign has ended");
-        require(campaign.pledged <= campaign.goal, "Campaign has already reached the goal");
-        require(campaign.canOperate, "Campaign operations are deactivated");
+        require(campaign.pledged < campaign.goal, "Campaign has already reached the goal");
+        require(campaign.canOperate == true, "Campaign operations are deactivated");
         _;
     }
 
@@ -63,9 +55,8 @@ contract CrowdFund is Ownable {
         require(_end > _start, "Campaing end date must be later than start date");
         require(_end <= _start + 90 days, "Campaigns must not last more than 90 days");
 
-        address[] memory _donors;
-        idCounter++;
-        campaigns[idCounter] = Campaign({
+        address[] memory _donors; 
+        campaigns.push(Campaign({
             id: idCounter,
             creator: msg.sender,
             goal: _goal,
@@ -75,8 +66,13 @@ contract CrowdFund is Ownable {
             donors: _donors,
             claimed: false,
             canOperate: true
-        });
+        }));
+        idCounter++;
         emit Created(idCounter, msg.sender, _goal, _start, _end);
+    }
+
+    function getCampaigns() external view returns (Campaign[] memory) {
+        return campaigns;
     }
 
     function pledge(uint256 id, uint256 amount) external _isActive(id) {
@@ -98,6 +94,7 @@ contract CrowdFund is Ownable {
         
         bool sent = token.transfer(msg.sender, amount);
         require(sent, "There was a problem sending tokens");
+        campaigns[id].pledged -= amount;
         pledgedAmount[id][msg.sender] -= amount;
         emit Unpledged(id, msg.sender, amount);
     }
@@ -110,7 +107,7 @@ contract CrowdFund is Ownable {
     function claimAllAndEnd(uint256 id) external {
         Campaign storage campaign = campaigns[id];
         require(campaign.creator == msg.sender, "You are not the creator of this campaign");
-        require(campaign.canOperate, "This campaign has been flagged. Reach to contract owner");
+        require(campaign.canOperate, "This campaign's operations has been stopped");
         require(campaign.claimed == false, "Tokens of this campaign has been already claimed");
 
         bool sent = token.transfer(msg.sender, campaign.pledged);
@@ -141,7 +138,7 @@ contract CrowdFund is Ownable {
         if(campaign.creator != msg.sender && owner() != msg.sender ) {
             revert("You don't have the authority to cancel this campaign");
         }
-        require(campaign.pledged <= 0, "There are still some tokens pledged for this campaign");
+        require(campaign.claimed || campaign.pledged <= 0, "There are still some tokens pledged for this campaign");
         delete campaigns[id];
         emit Cancel(id);
     }
@@ -153,10 +150,14 @@ contract CrowdFund is Ownable {
     */
     function refund(uint256 id) external onlyOwner {
         Campaign memory campaign = campaigns[id];
-        require(campaign.claimed, "Tokens for this campaign has been already claimed");
+        require(campaign.claimed == false, "Tokens for this campaign has been already claimed");
         for(uint i = 0; i < campaign.donors.length; i++) {
             address transferAddress = campaign.donors[i];
-            token.transfer(transferAddress, pledgedAmount[id][transferAddress]);
+            uint addressBalance = pledgedAmount[id][transferAddress];
+            token.transfer(transferAddress, addressBalance);
+            campaigns[id].pledged -= addressBalance;
+            pledgedAmount[id][transferAddress] -= addressBalance;
+            emit Unpledged(id, transferAddress, addressBalance);
         }
     }
 }
